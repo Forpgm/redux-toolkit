@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import Post from '../types/blog.type'
+import { build } from '@reduxjs/toolkit/dist/query/core/buildMiddleware/cacheLifecycle'
 export const blogApi = createApi({
   reducerPath: 'blogApi', // This is the name of the slice | tên field của Redux state
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:4000/' }),
@@ -27,7 +28,10 @@ export const blogApi = createApi({
         body
       }),
       invalidatesTags: [{ type: 'Posts', id: 'LIST' }]
+    }),
+    getPostItem: builder.query<Post, string>({
+      query: (id) => `posts/${id}`
     })
   })
 })
-export const { useGetPostsQuery, useAddPostMutation } = blogApi
+export const { useGetPostsQuery, useAddPostMutation, useGetPostItemQuery } = blogApi
