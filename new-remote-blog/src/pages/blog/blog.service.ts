@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import Post from '../types/blog.type'
 import { build } from '@reduxjs/toolkit/dist/query/core/buildMiddleware/cacheLifecycle'
+import { error } from 'console'
+import { url } from 'inspector'
 export const blogApi = createApi({
   reducerPath: 'blogApi', // This is the name of the slice | tên field của Redux state
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:4000/' }),
@@ -31,7 +33,32 @@ export const blogApi = createApi({
     }),
     getPostItem: builder.query<Post, string>({
       query: (id) => `posts/${id}`
+    }),
+    updatePost: builder.mutation<Post, { id: string; body: Post }>({
+      query: (data) => {
+        return {
+          url: `posts/${data.id}`,
+          method: 'PUT',
+          body: data.body
+        }
+      },
+      invalidatesTags: (result, error, data) => [{ type: 'Posts', id: data.id }]
+    }),
+    deletePost: builder.mutation<{}, string>({
+      query: (id) => {
+        return {
+          url: `posts/${id}`,
+          method: 'DELETE'
+        }
+      },
+      invalidatesTags: (result, error, id) => [{ type: 'Posts', id }]
     })
   })
 })
-export const { useGetPostsQuery, useAddPostMutation, useGetPostItemQuery } = blogApi
+export const {
+  useGetPostsQuery,
+  useAddPostMutation,
+  useGetPostItemQuery,
+  useUpdatePostMutation,
+  useDeletePostMutation
+} = blogApi

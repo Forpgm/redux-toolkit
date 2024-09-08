@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAddPostMutation, useGetPostItemQuery } from '../../blog.service'
+import { useAddPostMutation, useGetPostItemQuery, useUpdatePostMutation } from '../../blog.service'
 import Post from '../../../types/blog.type'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
@@ -12,8 +12,10 @@ const initialState: Omit<Post, 'id'> = {
   published: false
 }
 export default function CreatePost() {
-  const [formData, setFormData] = useState<Omit<Post, 'id'>>(initialState)
+  const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
   const [addPost, addPostResult] = useAddPostMutation()
+  const [updatePost, updatePostResult] = useUpdatePostMutation()
+
   const postId = useSelector((state: RootState) => state.blog.postId)
   const { data } = useGetPostItemQuery(postId, { skip: !postId })
   useEffect(() => {
@@ -23,7 +25,11 @@ export default function CreatePost() {
   }, [data])
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    await addPost(formData).unwrap()
+    if (postId) {
+      await updatePost({ id: postId, body: formData as Post }).unwrap()
+    } else {
+      await addPost(formData).unwrap()
+    }
     setFormData(initialState)
   }
 
