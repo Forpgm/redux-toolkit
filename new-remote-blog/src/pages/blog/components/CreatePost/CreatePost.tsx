@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAddPostMutation, useGetPostItemQuery, useUpdatePostMutation } from '../../blog.service'
 import Post from '../../../types/blog.type'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
+import { isEntityError, isFetchBaseQueryError } from 'utils/helpers'
 
 const initialState: Omit<Post, 'id'> = {
   title: '',
@@ -11,6 +13,14 @@ const initialState: Omit<Post, 'id'> = {
   featuredImage: '',
   published: false
 }
+
+type FormErrors =
+  | {
+      // [key in keyof Omit<Post, 'id'>]: string
+      [key in keyof typeof initialState]: string
+    }
+  | null
+
 export default function CreatePost() {
   const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
   const [addPost, addPostResult] = useAddPostMutation()
@@ -18,6 +28,15 @@ export default function CreatePost() {
 
   const postId = useSelector((state: RootState) => state.blog.postId)
   const { data } = useGetPostItemQuery(postId, { skip: !postId })
+
+  const errorForm: FormErrors = useMemo(() => {
+    const errorResult = postId ? updatePostResult.error : addPostResult.error
+    if (isEntityError(errorResult)) {
+      return errorResult.data.error as FormErrors
+    }
+    return null
+  }, [postId, addPostResult, updatePostResult])
+
   useEffect(() => {
     if (data) {
       setFormData(data)
