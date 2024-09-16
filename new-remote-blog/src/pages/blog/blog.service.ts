@@ -38,7 +38,7 @@ export const blogApi = createApi({
           throw new CustomError(error.message)
         }
       },
-      invalidatesTags: [{ type: 'Posts', id: 'LIST' }]
+      invalidatesTags: (result, error, body) => (error ? [] : [{ type: 'Posts', id: 'LIST' }])
     }),
     getPostItem: builder.query<Post, string>({
       query: (id) => `posts/${id}`
@@ -51,7 +51,7 @@ export const blogApi = createApi({
           body: data.body
         }
       },
-      invalidatesTags: (result, error, data) => [{ type: 'Posts', id: data.id }]
+      invalidatesTags: (result, error, data) => (error ? [] : [{ type: 'Posts', id: data.id }])
     }),
     deletePost: builder.mutation<{}, string>({
       query: (id) => {
