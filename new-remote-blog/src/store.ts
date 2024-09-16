@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/dist/query'
+import { rtkQueryErrorLogger } from 'middleware'
 import { blogApi } from 'pages/blog/blog.service'
 import blogReducer from 'pages/blog/blog.slice'
 
@@ -8,7 +9,7 @@ const store = configureStore({
     blog: blogReducer,
     [blogApi.reducerPath]: blogApi.reducer // thêm reducer được tạo từ api slice
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(blogApi.middleware) // thêm middleware của api slice
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(blogApi.middleware, rtkQueryErrorLogger) // thêm middleware của api slice
 })
 setupListeners(store.dispatch)
 

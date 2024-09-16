@@ -3,6 +3,7 @@ import Post from '../types/blog.type'
 import { build } from '@reduxjs/toolkit/dist/query/core/buildMiddleware/cacheLifecycle'
 import { error } from 'console'
 import { url } from 'inspector'
+import { CustomError } from 'utils/helpers'
 export const blogApi = createApi({
   reducerPath: 'blogApi', // This is the name of the slice | tên field của Redux state
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:4000/' }),
@@ -24,11 +25,19 @@ export const blogApi = createApi({
       }
     }),
     addPost: builder.mutation<Post, Omit<Post, 'id'>>({
-      query: (body) => ({
-        url: 'posts',
-        method: 'POST',
-        body
-      }),
+      query: (body) => {
+        try {
+          let a: any = null
+          a.b = 1
+          return {
+            url: 'posts',
+            method: 'POST',
+            body
+          }
+        } catch (error: any) {
+          throw new CustomError(error.message)
+        }
+      },
       invalidatesTags: [{ type: 'Posts', id: 'LIST' }]
     }),
     getPostItem: builder.query<Post, string>({
